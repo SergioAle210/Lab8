@@ -22,15 +22,19 @@ def mostrar_instrucciones():
         "(por ejemplo, base 2 es 'np.log(x) / np.log(2)')",
     )
     print(
-        "Puedes configurar el rango máximo de x y la escala de los ejes x e y en el menú principal.\n"
+        "Puedes configurar el rango máximo de x y la escala de los ejes x e y en el menú principal."
+    )
+    print(
+        "Además, puedes cargar funciones desde el archivo 'terminos_dom.txt' para graficarlas directamente.\n"
     )
 
 
-def mostrar_configuracion_actual(max_x, escala_x, escala_y):
+def mostrar_configuracion_actual(max_x, escala_x, escala_y, max_y):
     print(colored("\n--- Configuración Actual ---", "cyan", attrs=["bold"]))
     print(colored(f"Rango máximo de x: {max_x}", "yellow"))
     print(colored(f"Escala del eje x: {escala_x}", "yellow"))
     print(colored(f"Escala del eje y: {escala_y}", "yellow"))
+    print(colored(f"Rango máximo de y (si está definido): {max_y}", "yellow"))
 
 
 def obtener_numero_funciones():
@@ -65,6 +69,21 @@ def obtener_termino(prompt):
             )
 
 
+def cargar_terminos_desde_archivo(nombre_archivo):
+    try:
+        with open(nombre_archivo, "r") as file:
+            terms = [line.strip() for line in file if line.strip()]
+            print(
+                colored(
+                    f"{len(terms)} términos cargados desde '{nombre_archivo}'", "green"
+                )
+            )
+            return terms
+    except FileNotFoundError:
+        print(colored(f"Error: No se encontró el archivo '{nombre_archivo}'.", "red"))
+        return []
+
+
 def obtener_rango_x():
     while True:
         try:
@@ -82,6 +101,31 @@ def obtener_rango_x():
                 print(
                     colored(
                         "Por favor, ingresa un valor positivo para el rango de x.",
+                        "red",
+                    )
+                )
+        except ValueError:
+            print(colored("Entrada no válida. Ingresa un número.", "red"))
+
+
+def obtener_rango_y():
+    while True:
+        try:
+            max_y = float(
+                input(
+                    colored(
+                        "Ingrese el valor máximo para y o deja en blanco para automático: ",
+                        "yellow",
+                    )
+                )
+                or "inf"
+            )
+            if max_y > 0 or max_y == float("inf"):
+                return max_y
+            else:
+                print(
+                    colored(
+                        "Por favor, ingresa un valor positivo para el rango de y.",
                         "red",
                     )
                 )
@@ -111,7 +155,28 @@ def seleccionar_escala_eje(eje):
             )
 
 
-def plot_comparison(terms, max_x, escala_x, escala_y):
+def seleccionar_archivo():
+    while True:
+        print(
+            colored(
+                "\nSeleccione el archivo para cargar los términos:",
+                "cyan",
+                attrs=["bold"],
+            )
+        )
+        print(colored("1. terminos_dom.txt", "yellow"))
+        print(colored("2. terminos_dom_ordenados.txt", "yellow"))
+        opcion = input(colored("Seleccione una opción (1 o 2): ", "cyan"))
+
+        if opcion == "1":
+            return "terminos_dom.txt"
+        elif opcion == "2":
+            return "terminos_dom_ordenados.txt"
+        else:
+            print(colored("Opción no válida. Por favor, seleccione 1 o 2.", "red"))
+
+
+def plot_comparison(terms, max_x, escala_x, escala_y, max_y):
     # Definir el rango de x con el valor máximo seleccionado por el usuario
     x = np.linspace(1, max_x, 500)
     colors = [
@@ -125,6 +190,8 @@ def plot_comparison(terms, max_x, escala_x, escala_y):
         "gold",
         "slateblue",
         "tomato",
+        "olive",
+        "indigo",
     ]
 
     # Crear el gráfico
@@ -148,6 +215,10 @@ def plot_comparison(terms, max_x, escala_x, escala_y):
     # Configurar las escalas de los ejes
     plt.xscale(escala_x)
     plt.yscale(escala_y)
+
+    # Aplicar límite al eje y si se definió un máximo
+    if max_y != float("inf"):
+        plt.ylim(top=max_y)
 
     # Configuración del gráfico
     plt.xlabel("n", fontsize=12)
@@ -177,18 +248,21 @@ def menu():
     mostrar_instrucciones()
 
     # Valores por defecto
-    max_x = 10000
+    max_x = 1000000000
     escala_x = "linear"
     escala_y = "log"
+    max_y = float("inf")  # Sin límite máximo para y por defecto
 
     while True:
         print(colored("\n--- Menú Principal ---", "cyan", attrs=["bold"]))
         print(colored("1. Configurar rango máximo de x", "blue"))
         print(colored("2. Configurar escala del eje x", "blue"))
         print(colored("3. Configurar escala del eje y", "blue"))
-        print(colored("4. Ingresar y comparar términos", "green"))
-        print(colored("5. Ver instrucciones de uso", "yellow"))
-        print(colored("6. Salir", "red"))
+        print(colored("4. Configurar rango máximo de y", "blue"))
+        print(colored("5. Ingresar y comparar términos", "green"))
+        print(colored("6. Cargar términos desde archivo", "green"))
+        print(colored("7. Ver instrucciones de uso", "yellow"))
+        print(colored("8. Salir", "red"))
 
         opcion = input(colored("Seleccione una opción: ", "cyan", attrs=["bold"]))
 
@@ -202,8 +276,11 @@ def menu():
             escala_y = seleccionar_escala_eje("y")
 
         elif opcion == "4":
+            max_y = obtener_rango_y()
+
+        elif opcion == "5":
             # Mostrar configuración actual antes de graficar
-            mostrar_configuracion_actual(max_x, escala_x, escala_y)
+            mostrar_configuracion_actual(max_x, escala_x, escala_y, max_y)
 
             # Solicitar el número de funciones a comparar
             num_funciones = obtener_numero_funciones()
@@ -217,12 +294,20 @@ def menu():
                 terms.append(term)
 
             # Graficar los términos con la configuración seleccionada
-            plot_comparison(terms, max_x, escala_x, escala_y)
-
-        elif opcion == "5":
-            mostrar_instrucciones()
+            plot_comparison(terms, max_x, escala_x, escala_y, max_y)
 
         elif opcion == "6":
+            # Seleccionar el archivo a cargar
+            archivo = seleccionar_archivo()
+            terms = cargar_terminos_desde_archivo(archivo)
+            if terms:
+                mostrar_configuracion_actual(max_x, escala_x, escala_y, max_y)
+                plot_comparison(terms, max_x, escala_x, escala_y, max_y)
+
+        elif opcion == "7":
+            mostrar_instrucciones()
+
+        elif opcion == "8":
             print(
                 colored(
                     "Saliendo del programa. ¡Hasta pronto!", "magenta", attrs=["bold"]
