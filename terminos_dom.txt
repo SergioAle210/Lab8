@@ -1,0 +1,11 @@
+0.001 * x**3
+100 * x**1.5
+2.5 * x**1.75
+x**2 * (np.log(x) / np.log(2))
+x * (np.log(x) / np.log(2))
+3 * (np.log(x) / np.log(8))
+0.01 * x**2
+2**x
+x * (np.log(x) / np.log(2))**2
+x**3
+0.003 * (np.log(x) / np.log(4))
