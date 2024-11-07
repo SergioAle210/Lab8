@@ -94,19 +94,19 @@ def seleccionar_escala_eje(eje):
         escala = (
             input(
                 colored(
-                    f"Seleccione la escala para el eje {eje} ('lineal' o 'log'): ",
+                    f"Seleccione la escala para el eje {eje} ('linear' o 'log'): ",
                     "yellow",
                 )
             )
             .strip()
             .lower()
         )
-        if escala in ["lineal", "log"]:
+        if escala in ["linear", "log"]:
             return escala
         else:
             print(
                 colored(
-                    "Entrada no válida. Por favor, ingrese 'lineal' o 'log'.", "red"
+                    "Entrada no válida. Por favor, ingrese 'linear' o 'log'.", "red"
                 )
             )
 
@@ -178,7 +178,7 @@ def menu():
 
     # Valores por defecto
     max_x = 10000
-    escala_x = "lineal"
+    escala_x = "linear"
     escala_y = "log"
 
     while True:
