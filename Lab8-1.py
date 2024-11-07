@@ -6,7 +6,7 @@ from termcolor import colored
 def mostrar_instrucciones():
     print(colored("\n--- Instrucciones de Uso ---", "cyan", attrs=["bold"]))
     print(
-        "Este programa te permite graficar y comparar el crecimiento de dos términos."
+        "Este programa te permite graficar y comparar el crecimiento de múltiples términos."
     )
     print(
         "Puedes ingresar términos como polinomios, exponenciales y logaritmos con diferentes bases."
@@ -26,8 +26,26 @@ def mostrar_instrucciones():
     )
 
 
+def obtener_numero_funciones():
+    while True:
+        try:
+            num = int(
+                input(
+                    colored(
+                        "¿Cuántas funciones quieres comparar? (Ejemplo: 2, 3, 4, etc.): ",
+                        "yellow",
+                    )
+                )
+            )
+            if num > 0:
+                return num
+            else:
+                print(colored("Por favor, ingresa un número positivo.", "red"))
+        except ValueError:
+            print(colored("Entrada no válida. Ingresa un número entero.", "red"))
+
+
 def obtener_termino(prompt):
-    # Función para solicitar un término hasta que el usuario ingrese algo válido
     while True:
         termino = input(colored(prompt, "yellow"))
         if termino.strip():  # Verifica si no está vacío o solo tiene espacios
@@ -40,22 +58,39 @@ def obtener_termino(prompt):
             )
 
 
-def plot_comparison(term1, term2):
+def plot_comparison(terms):
     # Definir el rango de x
     x = np.linspace(1, 10000, 500)
-
-    # Evaluar los términos utilizando eval
-    try:
-        y1 = eval(term1, {"x": x, "np": np})
-        y2 = eval(term2, {"x": x, "np": np})
-    except Exception as e:
-        print(colored(f"Error al evaluar los términos: {e}", "red"))
-        return
+    colors = [
+        "dodgerblue",
+        "darkorange",
+        "forestgreen",
+        "crimson",
+        "purple",
+        "brown",
+        "teal",
+        "gold",
+        "slateblue",
+        "tomato",
+    ]
 
     # Crear el gráfico
     plt.figure(figsize=(12, 7))
-    plt.plot(x, y1, label=f"Término 1: {term1}", color="dodgerblue", linewidth=2)
-    plt.plot(x, y2, label=f"Término 2: {term2}", color="darkorange", linewidth=2)
+
+    # Evaluar y graficar cada término
+    for i, term in enumerate(terms):
+        try:
+            y = eval(term, {"x": x, "np": np})
+            plt.plot(
+                x,
+                y,
+                label=f"Término {i + 1}: {term}",
+                color=colors[i % len(colors)],
+                linewidth=2,
+            )
+        except Exception as e:
+            print(colored(f"Error al evaluar el término '{term}': {e}", "red"))
+            return
 
     # Cambiar la escala del eje y a logarítmica para observar el crecimiento relativo
     plt.yscale("log")
@@ -64,14 +99,14 @@ def plot_comparison(term1, term2):
     plt.xlabel("n", fontsize=12)
     plt.ylabel("Valor del término", fontsize=12)
     plt.title(
-        "Comparación del crecimiento de dos términos",
+        "Comparación del crecimiento de múltiples términos",
         fontsize=16,
         color="purple",
         fontweight="bold",
     )
     plt.legend(fontsize=10)
     plt.grid(True, which="both", linestyle="--", linewidth=0.5, color="gray")
-    plt.tight_layout()  # Ajusta el espaciado automáticamente para una visualización óptima
+    plt.tight_layout()
 
     # Mostrar el gráfico
     plt.show()
@@ -89,23 +124,26 @@ def menu():
 
     while True:
         print(colored("\n--- Menú Principal ---", "cyan", attrs=["bold"]))
-        print(colored("1. Ingresar y comparar dos términos", "green"))
+        print(colored("1. Ingresar y comparar términos", "green"))
         print(colored("2. Ver instrucciones de uso", "yellow"))
         print(colored("3. Salir", "red"))
 
         opcion = input(colored("Seleccione una opción: ", "cyan", attrs=["bold"]))
 
         if opcion == "1":
-            # Solicitar al usuario los términos de la expresión
-            term1 = obtener_termino(
-                "Ingrese el primer término de la expresión en términos de x (ejemplo: '0.001 * x**3'): "
-            )
-            term2 = obtener_termino(
-                "Ingrese el segundo término de la expresión en términos de x (ejemplo: '0.025 * x'): "
-            )
+            # Solicitar el número de funciones a comparar
+            num_funciones = obtener_numero_funciones()
+
+            # Solicitar cada término
+            terms = []
+            for i in range(num_funciones):
+                term = obtener_termino(
+                    f"Ingrese el término {i + 1} en términos de x (ejemplo: '0.001 * x**3'): "
+                )
+                terms.append(term)
 
             # Graficar los términos
-            plot_comparison(term1, term2)
+            plot_comparison(terms)
 
         elif opcion == "2":
             mostrar_instrucciones()
