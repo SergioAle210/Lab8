@@ -22,8 +22,15 @@ def mostrar_instrucciones():
         "(por ejemplo, base 2 es 'np.log(x) / np.log(2)')",
     )
     print(
-        "Para cambiar el rango de x, modifica los valores en la línea de 'np.linspace' dentro del código.\n"
+        "Puedes configurar el rango máximo de x y la escala de los ejes x e y en el menú principal.\n"
     )
+
+
+def mostrar_configuracion_actual(max_x, escala_x, escala_y):
+    print(colored("\n--- Configuración Actual ---", "cyan", attrs=["bold"]))
+    print(colored(f"Rango máximo de x: {max_x}", "yellow"))
+    print(colored(f"Escala del eje x: {escala_x}", "yellow"))
+    print(colored(f"Escala del eje y: {escala_y}", "yellow"))
 
 
 def obtener_numero_funciones():
@@ -58,9 +65,55 @@ def obtener_termino(prompt):
             )
 
 
-def plot_comparison(terms):
-    # Definir el rango de x
-    x = np.linspace(1, 10000, 500)
+def obtener_rango_x():
+    while True:
+        try:
+            max_x = float(
+                input(
+                    colored(
+                        "Ingrese el valor máximo para x (Ejemplo: 10000, 100000000): ",
+                        "yellow",
+                    )
+                )
+            )
+            if max_x > 0:
+                return max_x
+            else:
+                print(
+                    colored(
+                        "Por favor, ingresa un valor positivo para el rango de x.",
+                        "red",
+                    )
+                )
+        except ValueError:
+            print(colored("Entrada no válida. Ingresa un número.", "red"))
+
+
+def seleccionar_escala_eje(eje):
+    while True:
+        escala = (
+            input(
+                colored(
+                    f"Seleccione la escala para el eje {eje} ('lineal' o 'log'): ",
+                    "yellow",
+                )
+            )
+            .strip()
+            .lower()
+        )
+        if escala in ["lineal", "log"]:
+            return escala
+        else:
+            print(
+                colored(
+                    "Entrada no válida. Por favor, ingrese 'lineal' o 'log'.", "red"
+                )
+            )
+
+
+def plot_comparison(terms, max_x, escala_x, escala_y):
+    # Definir el rango de x con el valor máximo seleccionado por el usuario
+    x = np.linspace(1, max_x, 500)
     colors = [
         "dodgerblue",
         "darkorange",
@@ -92,8 +145,9 @@ def plot_comparison(terms):
             print(colored(f"Error al evaluar el término '{term}': {e}", "red"))
             return
 
-    # Cambiar la escala del eje y a logarítmica para observar el crecimiento relativo
-    plt.yscale("log")
+    # Configurar las escalas de los ejes
+    plt.xscale(escala_x)
+    plt.yscale(escala_y)
 
     # Configuración del gráfico
     plt.xlabel("n", fontsize=12)
@@ -122,15 +176,35 @@ def menu():
     )
     mostrar_instrucciones()
 
+    # Valores por defecto
+    max_x = 10000
+    escala_x = "lineal"
+    escala_y = "log"
+
     while True:
         print(colored("\n--- Menú Principal ---", "cyan", attrs=["bold"]))
-        print(colored("1. Ingresar y comparar términos", "green"))
-        print(colored("2. Ver instrucciones de uso", "yellow"))
-        print(colored("3. Salir", "red"))
+        print(colored("1. Configurar rango máximo de x", "blue"))
+        print(colored("2. Configurar escala del eje x", "blue"))
+        print(colored("3. Configurar escala del eje y", "blue"))
+        print(colored("4. Ingresar y comparar términos", "green"))
+        print(colored("5. Ver instrucciones de uso", "yellow"))
+        print(colored("6. Salir", "red"))
 
         opcion = input(colored("Seleccione una opción: ", "cyan", attrs=["bold"]))
 
         if opcion == "1":
+            max_x = obtener_rango_x()
+
+        elif opcion == "2":
+            escala_x = seleccionar_escala_eje("x")
+
+        elif opcion == "3":
+            escala_y = seleccionar_escala_eje("y")
+
+        elif opcion == "4":
+            # Mostrar configuración actual antes de graficar
+            mostrar_configuracion_actual(max_x, escala_x, escala_y)
+
             # Solicitar el número de funciones a comparar
             num_funciones = obtener_numero_funciones()
 
@@ -142,13 +216,13 @@ def menu():
                 )
                 terms.append(term)
 
-            # Graficar los términos
-            plot_comparison(terms)
+            # Graficar los términos con la configuración seleccionada
+            plot_comparison(terms, max_x, escala_x, escala_y)
 
-        elif opcion == "2":
+        elif opcion == "5":
             mostrar_instrucciones()
 
-        elif opcion == "3":
+        elif opcion == "6":
             print(
                 colored(
                     "Saliendo del programa. ¡Hasta pronto!", "magenta", attrs=["bold"]
