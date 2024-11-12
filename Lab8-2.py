@@ -3,8 +3,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Definir los valores de a y b
-a = 10.0
-b = 15.0
+a = 13.1434343
+b = 15.3821848
 
 # Número de repeticiones para la suma en cada experimento
 N = 10000
