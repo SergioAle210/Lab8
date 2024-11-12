@@ -3,8 +3,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Definir los valores de a y b
-a = 5
-b = 10
+a = 50000
+b = 30000
 
 # Número de repeticiones para la suma en cada experimento
 N = 10000
@@ -40,5 +40,7 @@ plt.title("Distribución de los tiempos promedio para la operación de suma")
 plt.show()
 
 # Imprimir resultados
+print("Valores que se utilizaron para a y b:", a, b)
+print("Resultados:")
 print("Tiempo promedio total:", np.mean(tiempos_promedio))
 print("Desviación estándar de los tiempos promedio:", np.std(tiempos_promedio))
