@@ -21,7 +21,7 @@ for _ in range(k):
 
     # Realizar la operación de suma N veces
     for _ in range(N):
-        resultado = a + b
+        resultado = a / b
 
     fin = time.time()
 
